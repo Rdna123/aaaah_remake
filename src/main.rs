@@ -16,8 +16,8 @@ fn main() {
         .run();
 }
 
-fn aah_window_title(input: Res<Input<KeyCode>>, mut window: Query<&mut Window>) {
-    if input.pressed(KeyCode::A) {
+fn aah_window_title(input: Res<ButtonInput<KeyCode>>, mut window: Query<&mut Window>) {
+    if input.pressed(KeyCode::KeyA) {
         let mut window = window.single_mut();
         let count = window.title.len();
         let mut title = "".to_string();
@@ -52,7 +52,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             source: asset_server.load("sound/markie-screaming.ogg"),
             settings: PlaybackSettings {
                 mode: PlaybackMode::Loop,
-                volume: Volume::new_relative(3.0),
+                volume: Volume::new(3.0),
                 ..default()
             },
         },
@@ -76,11 +76,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn make_mark_scream(
-    input: Res<Input<KeyCode>>,
+    input: Res<ButtonInput<KeyCode>>,
     sound_controller: Query<&AudioSink, With<MarkScream>>,
     mut scream: Query<(&mut State, &mut ScreamTimer)>,
 ) {
-    if input.just_pressed(KeyCode::S) {
+    if input.just_pressed(KeyCode::KeyS) {
         if let Ok(sink) = sound_controller.get_single() {
             sink.toggle();
         }
