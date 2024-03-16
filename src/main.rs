@@ -47,6 +47,8 @@ struct ScreamTimer {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(Camera2dBundle::default());
+
     commands.spawn((
         AudioBundle {
             source: asset_server.load("sound/markie-screaming.ogg"),
@@ -58,14 +60,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         MarkScream,
     ));
+
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("images/mark.png"),
-            transform: Transform {
-                translation: Vec3::new(100.0, 0.0, 1.0),
-                scale: Vec3::new(1.0, 1.0, 1.0),
-                ..default()
-            },
+            transform: Transform::from_xyz(000.0, 0.0, 1.0),
+
             ..default()
         },
         State::Go,
