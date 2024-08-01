@@ -1,4 +1,5 @@
 use bevy::audio::{PlaybackMode, Volume};
+use bevy::math::vec3;
 use bevy::prelude::*;
 use std::time::Duration;
 
@@ -64,7 +65,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("images/mark.png"),
-            transform: Transform::from_xyz(000.0, 0.0, 1.0),
+            transform: Transform::from_xyz(0.0, 0.0, 1.0).with_scale(vec3(0.5, 0.5, 0.5)),
 
             ..default()
         },
@@ -103,8 +104,8 @@ fn screaming_face(mut image: Query<(&mut Transform, &State, &mut ScreamTimer)>, 
     for (mut transform, state, mut scream) in &mut image {
         debug!("aaah");
         if state == &State::Go {
-            transform.scale.x += 1.0;
-            transform.scale.y += 1.0;
+            transform.scale.x += 0.5;
+            transform.scale.y += 0.5;
         }
         if scream.timer.tick(time.delta()).just_finished() {
             transform.scale = Vec3::ZERO;
