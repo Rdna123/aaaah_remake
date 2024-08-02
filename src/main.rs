@@ -105,8 +105,8 @@ fn screaming_face(mut image: Query<(&mut Transform, &State, &mut ScreamTimer)>, 
     for (mut transform, state, mut scream) in &mut image {
         debug!("aaah");
         if state == &State::Go {
-            transform.scale.x += 0.5;
-            transform.scale.y += 0.5;
+            transform.scale.x += 0.1;
+            transform.scale.y += 0.1;
         }
         if scream.timer.tick(time.delta()).just_finished() {
             transform.scale = Vec3::ZERO;
