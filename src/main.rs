@@ -56,6 +56,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             settings: PlaybackSettings {
                 mode: PlaybackMode::Loop,
                 volume: Volume::new(3.0),
+                paused: true,
                 ..default()
             },
         },
@@ -69,7 +70,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
             ..default()
         },
-        State::Go,
+        State::Stop,
         ScreamTimer {
             timer: Timer::new(Duration::from_secs_f32(6.59), TimerMode::Repeating),
         },
