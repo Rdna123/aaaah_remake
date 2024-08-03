@@ -80,7 +80,20 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-fn make_mark_scream(
+fn sync_mark_scream(
+    sound_controller: Query<&AudioSink, With<MarkScream>>,
+    mut scream: Query<&mut ScreamTimer>,
+    time: Res<Time>,
+) {
+    let mut timer = scream.get_single_mut().unwrap();
+    let audio = sound_controller.get_single().unwrap();
+
+    if timer.timer.tick(time.delta()).just_finished() {
+        // audio.
+    }
+}
+
+fn toggle_mark_scream(
     input: Res<ButtonInput<KeyCode>>,
     sound_controller: Query<&AudioSink, With<MarkScream>>,
     mut scream: Query<(&mut State, &mut ScreamTimer)>,
