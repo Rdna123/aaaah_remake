@@ -13,7 +13,10 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, setup)
-        .add_systems(Update, (make_mark_scream, aah_window_title, screaming_face))
+        .add_systems(
+            Update,
+            (toggle_mark_scream, aah_window_title, screaming_face),
+        )
         .run();
 }
 
@@ -66,13 +69,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("images/mark.png"),
-            transform: Transform::from_xyz(0.0, 0.0, 1.0).with_scale(vec3(0.5, 0.5, 0.5)),
+            transform: Transform::from_xyz(0.0, 0.0, 1.0).with_scale(vec3(0.25, 0.25, 0.25)),
 
             ..default()
         },
         State::Stop,
         ScreamTimer {
-            timer: Timer::new(Duration::from_secs_f32(6.59), TimerMode::Repeating),
+            timer: Timer::new(Duration::from_secs_f32(5.99), TimerMode::Repeating),
         },
     ));
 }
@@ -105,8 +108,10 @@ fn screaming_face(mut image: Query<(&mut Transform, &State, &mut ScreamTimer)>, 
     for (mut transform, state, mut scream) in &mut image {
         debug!("aaah");
         if state == &State::Go {
-            transform.scale.x += 0.1;
-            transform.scale.y += 0.1;
+            scream.timer.tick(time.delta());
+            let t = (63.75 + 329.375 * scream.timer.elapsed_secs()) / 255.0;
+            transform.scale.x = t;
+            transform.scale.y = t;
         }
         if scream.timer.tick(time.delta()).just_finished() {
             transform.scale = Vec3::ZERO;
