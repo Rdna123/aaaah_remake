@@ -1,21 +1,29 @@
-use bevy::audio::{PlaybackMode, Volume};
 use bevy::math::vec3;
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 use std::time::Duration;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "AH".into(),
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "AH".into(),
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }))
+            bevy_kira_audio::AudioPlugin,
+        ))
         .add_systems(Startup, setup)
         .add_systems(
             Update,
-            (toggle_mark_scream, aah_window_title, screaming_face),
+            (
+                toggle_mark_scream,
+                aah_window_title,
+                screaming_face,
+                sync_mark_scream,
+            ),
         )
         .run();
 }
@@ -36,8 +44,8 @@ fn aah_window_title(input: Res<ButtonInput<KeyCode>>, mut window: Query<&mut Win
     }
 }
 
-#[derive(Component)]
-struct MarkScream;
+#[derive(Resource)]
+struct MarkScream(Handle<AudioInstance>);
 
 #[derive(Component, PartialEq)]
 enum State {
@@ -50,21 +58,16 @@ struct ScreamTimer {
     timer: Timer,
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn((
-        AudioBundle {
-            source: asset_server.load("sound/markie-screaming.ogg"),
-            settings: PlaybackSettings {
-                mode: PlaybackMode::Loop,
-                volume: Volume::new(3.0),
-                paused: true,
-                ..default()
-            },
-        },
-        MarkScream,
-    ));
+    let scream_handle = audio
+        .play(asset_server.load("sound/mark-screaming.ogg"))
+        .looped()
+        .with_volume(3.0)
+        .handle();
+
+    commands.insert_resource(MarkScream(scream_handle));
 
     commands.spawn((
         SpriteBundle {
@@ -81,26 +84,28 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn sync_mark_scream(
-    sound_controller: Query<&AudioSink, With<MarkScream>>,
-    mut scream: Query<&mut ScreamTimer>,
+    scream: Res<MarkScream>,
+    mut scream_timer: Query<&mut ScreamTimer>,
     time: Res<Time>,
+    mut audio_instance: ResMut<Assets<AudioInstance>>,
 ) {
-    let mut timer = scream.get_single_mut().unwrap();
-    let audio = sound_controller.get_single().unwrap();
+    let mut timer = scream_timer.get_single_mut().unwrap();
 
     if timer.timer.tick(time.delta()).just_finished() {
-        // audio.
+        let instance = audio_instance.get_mut(&scream.0).unwrap();
+        instance.seek_to(0.0);
     }
 }
 
 fn toggle_mark_scream(
     input: Res<ButtonInput<KeyCode>>,
-    sound_controller: Query<&AudioSink, With<MarkScream>>,
+    sound: Res<MarkScream>,
+    mut audio_instances: ResMut<Assets<AudioInstance>>,
     mut scream: Query<(&mut State, &mut ScreamTimer)>,
 ) {
     if input.just_pressed(KeyCode::KeyS) {
-        if let Ok(sink) = sound_controller.get_single() {
-            sink.toggle();
+        if let Some(instance) = audio_instances.get_mut(&sound.0) {
+            instance.pause(AudioTween::default());
         }
         if let Ok((mut s, mut t)) = scream.get_single_mut() {
             match *s {
