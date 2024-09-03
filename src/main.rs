@@ -103,7 +103,7 @@ fn toggle_mark_scream(
     mut audio_instances: ResMut<Assets<AudioInstance>>,
     mut scream: Query<(&mut State, &mut ScreamTimer)>,
 ) {
-    if input.just_pressed(KeyCode::KeyS) {
+    if input.just_pressed(KeyCode::Space) {
         if let Some(instance) = audio_instances.get_mut(&sound.0) {
             instance.pause(AudioTween::default());
         }
